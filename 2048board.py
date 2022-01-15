@@ -1,6 +1,4 @@
-arr = []
-for i in range(4):
-    arr.append(list(map(int, input().split())))
+arr = [list(map(int, input().split())) for _ in range(4)]
 d = int(input())
 
 class Board:
@@ -10,42 +8,20 @@ class Board:
     def move(self, start_pos, end_pos):
         piece = self.board_state[start_pos[0]][start_pos[1]]
         piece.row, piece.col = end_pos[0], end_pos[1]
-        self.board_state[end_pos[0]][end_pos[1]] = piece
-        self.board_state[start_pos[0]][start_pos[1]] = None
+        self.board_state[end_pos[0]][end_pos[1]], self.board_state[start_pos[0]][start_pos[1]] = piece, None
 
     def shift_all_tiles(self, direction): # works
-        if direction == (0, -1): #left
-            for i in range(4):
-                for j in range(4):
-                    tile = self.board_state[i][j]
-                    if tile is not None:
-                        tile.shift((0,-1), self)
-        elif direction == (-1, 0): #up
-            for i in range(4):
-                for j in range(4):
-                    tile = self.board_state[j][i] #shift column by column upwards
-                    if tile is not None:
-                        tile.shift((-1, 0), self)
-        elif direction == (0, 1): #right
-            for i in range(4):
-                for j in range(4):
-                    tile = self.board_state[i][3 - j] #shift tiles in reverse order as leftwards
-                    if tile is not None:
-                        tile.shift((0, 1), self)
-        elif direction == (1, 0): #down
-            for i in range(4):
-                for j in range(4):
-                    tile = self.board_state[3 - j][i] #shift tiles in reverse order as upwards
-                    if tile is not None:
-                        tile.shift((1, 0), self)
-
+        for i in range(4):
+            for j in range(4):
+                dict1 = {(0, -1): self.board_state[i][j], (-1, 0): self.board_state[j][i],
+                         (0, 1): self.board_state[i][3 - j], (1, 0): self.board_state[3 - j][i]}
+                tile = dict1[direction]
+                if tile is not None:
+                    tile.shift(direction, self)
 
 class Tile:
     def __init__(self, number):
-        self.number = number
-        self.row = None
-        self.col = None
-        self.merged = False
+        self.number, self.row, self.col, self.merged = number, None, None, False
 
     def shift(self, direction, board):
         while self.row + direction[0] in range(4) and self.col + direction[1] in range(4):
@@ -53,14 +29,11 @@ class Tile:
             tile = board.board_state[new_pos[0]][new_pos[1]]
             if tile is None:
                 board.move((self.row, self.col), new_pos)
-            elif tile.number == self.number and tile.merged == False:
-                self.number *= 2
-                board.move((self.row, self.col), new_pos)
-                self.merged = True
-                break
             else:
+                if tile.number == self.number and tile.merged == False:
+                    self.number, self.merged = self.number * 2, True
+                    board.move((self.row, self.col), new_pos)
                 break
-
 
 
 def board_state_converter(arr): #works
@@ -72,27 +45,9 @@ def board_state_converter(arr): #works
                 board_state[i][j].row, board_state[i][j].col = i, j
     return board_state
 
-def print_board_state(board_state): #works
-    for i in range(4):
-        arr = []
-        for elem in board_state[i]:
-            if elem is not None:
-                arr.append(elem.number)
-            else:
-                arr.append(0)
-        print(*arr)
+def print_board_state(board_state):
+    for i in range(4): print(*[elem.number if elem is not None else 0 for elem in board_state[i]])
 
-b = Board(board_state_converter(arr))
-
-if d == 0:
-    b.shift_all_tiles((0, -1)) #left
-elif d == 1:
-    b.shift_all_tiles((-1, 0)) #up
-elif d == 2:
-    b.shift_all_tiles((0, 1)) #right
-elif d == 3:
-    b.shift_all_tiles((1, 0)) # down
-
+b, dict_d = Board(board_state_converter(arr)), {0: (0, -1), 1: (-1, 0), 2: (0, 1), 3: (1, 0)}
+b.shift_all_tiles(dict_d[d])
 print_board_state(b.board_state)
-
-
