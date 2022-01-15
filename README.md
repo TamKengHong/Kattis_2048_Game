@@ -5,7 +5,7 @@ This is the famous 2048 game, done using python and OOP.
 
 It takes in an existing 4x4 board state and a direction 0,1,2,3 (for left, up, right, down) and outputs the correct final board state after making that move.
 
-#To Do:
+# To Do: (maybe as a project next time)
 1. Clean up the code/refactor
 2. Create the actual game to play (with random tiles spawning after each move etc)
 3. Create a GUI
